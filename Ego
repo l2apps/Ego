@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="vi" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alter Ego - Nhật ký nội tâm</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        midnight: {
+                            900: '#0B0F19',
+                            800: '#111827',
+                            700: '#1F2937',
+                            600: '#374151',
+                        },
+                        alter: {
+                            purple: '#8B5CF6',
+                            indigo: '#6366F1',
+                            glow: 'rgba(139, 92, 246, 0.15)',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;1,400&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        html, body {
+            height: 100%;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0B0F19;
+            color: #F3F4F6;
+        }
+        .font-alter {
+            font-family: 'Playfair Display', serif;
+        }
+        /* Custom scrollbar for immersive dark vibe */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0B0F19;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #374151;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4B5563;
+        }
+    </style>
+</head>
+<body class="bg-midnight-900 text-gray-100 flex overflow-hidden selection:bg-purple-500 selection:text-white">
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed top-5 right-5 z-50 transform translate-y-[-200%] transition-transform duration-300 bg-midnight-700 border border-purple-500/30 px-4 py-3 rounded-xl shadow-2xl flex items-center space-x-3 text-sm">
+        <i id="toast-icon" class="fa-solid fa-circle-check text-purple-400"></i>
+        <span id="toast-msg">Đã lưu thành công</span>
+    </div>
+
+    <!-- Backdrop for mobile sidebar -->
+    <div id="sidebar-backdrop" onclick="toggleSidebar()" class="fixed inset-0 z-30 bg-black/50 hidden lg:hidden"></div>
+
+    <!-- Sidebar / Settings Drawer -->
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 w-80 max-w-[85vw] bg-midnight-900 border-r border-midnight-700/50 flex flex-col transform -translate-x-full lg:translate-x-0 transition-transform duration-300 shadow-2xl">
+        <!-- Sidebar Header -->
+        <div class="p-6 border-b border-midnight-700/50 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-purple-500/20">
+                    <i class="fa-solid fa-moon text-white text-sm"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold tracking-wide text-base">ALTER EGO</h1>
+                    <p class="text-xs text-gray-400">Không gian tâm sự riêng tư</p>
+                </div>
+            </div>
+            <button onclick="toggleSidebar()" class="lg:hidden text-gray-400 hover:text-white p-2">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+
+        <!-- Settings Content -->
+        <div class="flex-1 overflow-y-auto p-6 space-y-6">
+            <!-- Ego Profile Setup -->
+            <div class="space-y-4">
+                <h2 class="text-xs font-semibold uppercase tracking-wider text-purple-400">Thiết lập Alter Ego</h2>
+                <div>
+                    <label class="block text-xs font-medium text-gray-300 mb-1">Tên Alter Ego</label>
+                    <input type="text" id="ego-name" class="w-full bg-midnight-800 border border-midnight-600 rounded-lg px-3 py-2 text-sm text-gray-200 focus:outline-none focus:border-purple-500 transition-colors" placeholder="Ví dụ: Noname">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-300 mb-1">Mô tả / Bản chất</label>
+                    <textarea id="ego-desc" rows="2" class="w-full bg-midnight-800 border border-midnight-600 rounded-lg px-3 py-2 text-sm text-gray-200 focus:outline-none focus:border-purple-500 transition-colors resize-none" placeholder="Mô tả ngắn về góc khuất hoặc khía cạnh này của bạn..."></textarea>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-300 mb-1">Biểu tượng (Emoji)</label>
+                    <input type="text" id="ego-avatar" maxlength="8" class="w-16 text-center bg-midnight-800 border border-midnight-600 rounded-lg px-3 py-2 text-lg text-gray-200 focus:outline-none focus:border-purple-500 transition-colors" placeholder="🌑">
+                </div>
+                <button onclick="saveEgoSettings()" class="w-full py-2 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/40 text-purple-300 rounded-lg text-sm font-medium transition-all">
+                    Cập nhật thông tin
+                </button>
+            </div>
+
+            <hr class="border-midnight-700/50">
+
+            <!-- Data Actions -->
+            <div class="space-y-3">
+                <h2 class="text-xs font-semibold uppercase tracking-wider text-purple-400">Hành động</h2>
+                <button onclick="exportToWord()" class="w-full flex items-center justify-center space-x-2 py-2.5 bg-midnight-800 hover:bg-midnight-700 border border-midnight-600 rounded-lg text-sm text-gray-300 transition-all">
+                    <i class="fa-solid fa-download text-xs text-purple-400"></i>
+                    <span>Xuất nhật ký (Word)</span>
+                </button>
+                <button onclick="confirmClearChat()" class="w-full flex items-center justify-center space-x-2 py-2.5 bg-red-950/20 hover:bg-red-900/30 border border-red-900/40 rounded-lg text-sm text-red-300 transition-all">
+                    <i class="fa-solid fa-trash-can text-xs"></i>
+                    <span>Xóa toàn bộ cuộc trò chuyện</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Sidebar Footer -->
+        <div class="p-4 border-t border-midnight-700/50 text-center text-xs text-gray-500">
+            Dữ liệu được lưu trữ hoàn toàn nội bộ trên trình duyệt (LocalStorage). Xóa dữ liệu trình duyệt sẽ mất nhật ký, hãy xuất file định kỳ.
+        </div>
+    </aside>
+
+    <!-- Main Container -->
+    <div class="flex-1 flex flex-col h-full min-w-0 lg:pl-80 relative">
+        <!-- Top Navigation Bar -->
+        <header class="h-16 shrink-0 border-b border-midnight-700/50 bg-midnight-900/80 backdrop-blur-md flex items-center justify-between px-4 sm:px-6 z-30">
+            <div class="flex items-center space-x-4 min-w-0">
+                <button onclick="toggleSidebar()" class="lg:hidden text-gray-400 hover:text-white p-2">
+                    <i class="fa-solid fa-bars text-lg"></i>
+                </button>
+                <div class="flex items-center space-x-3 min-w-0">
+                    <div id="header-avatar" class="w-9 h-9 shrink-0 rounded-full bg-purple-900/50 border border-purple-500/30 flex items-center justify-center text-base shadow-inner">
+                        🌑
+                    </div>
+                    <div class="min-w-0">
+                        <div class="flex items-center space-x-2">
+                            <span id="header-ego-name" class="font-bold text-sm tracking-wide text-purple-200 truncate">Alter Ego</span>
+                            <span class="inline-block w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse"></span>
+                        </div>
+                        <p id="header-ego-desc" class="text-xs text-gray-400 truncate max-w-[10rem] sm:max-w-xs">Góc khuất trong tâm trí</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Header Controls: Mode Toggle -->
+            <div class="flex items-center space-x-3">
+                <div class="bg-midnight-800 p-1 rounded-xl border border-midnight-600 flex items-center space-x-1">
+                    <button id="btn-mode-chat" onclick="setMode('chat')" class="px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center space-x-1.5 bg-purple-600 text-white shadow-sm">
+                        <i class="fa-solid fa-comments text-xs"></i>
+                        <span class="hidden sm:inline">Trò chuyện</span>
+                    </button>
+                    <button id="btn-mode-reflect" onclick="setMode('reflect')" class="px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center space-x-1.5 text-gray-400 hover:text-white">
+                        <i class="fa-solid fa-book-open text-xs"></i>
+                        <span class="hidden sm:inline">Suy ngẫm</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Quote banner (chỉ hiển thị ở chế độ Suy ngẫm) -->
+        <div id="quote-banner" class="hidden shrink-0 px-4 sm:px-8 py-2.5 border-b border-midnight-700/50 bg-midnight-900/60 text-center">
+            <p id="ego-quote" class="text-[11px] sm:text-xs text-purple-300/70 leading-relaxed max-w-3xl mx-auto"></p>
+        </div>
+
+        <!-- Chat Stream Area -->
+        <main id="chat-container" class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 space-y-6">
+            <!-- Messages rendered dynamically via JS -->
+        </main>
+
+        <!-- Input Area (Chat Mode Only) -->
+        <footer id="input-footer" class="shrink-0 border-t border-midnight-700/50 bg-midnight-900/90 backdrop-blur-md p-4 sm:p-6 transition-all duration-300">
+            <div class="max-w-4xl mx-auto space-y-3">
+
+                <!-- Role Selector Tabs & Mood Tag Selector -->
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <!-- Switch Sender Role -->
+                    <div class="flex items-center space-x-2 bg-midnight-800 p-1 rounded-lg border border-midnight-600">
+                        <span class="text-xs text-gray-400 px-2 font-medium">Gửi với tư cách:</span>
+                        <button type="button" id="role-user-btn" onclick="setActiveRole('user')" class="px-3 py-1 rounded-md text-xs font-semibold transition-all bg-indigo-600 text-white shadow">
+                            Bạn (User)
+                        </button>
+                        <button type="button" id="role-ego-btn" onclick="setActiveRole('ego')" class="px-3 py-1 rounded-md text-xs font-semibold transition-all text-gray-400 hover:text-white">
+                            <span id="role-ego-label">Alter Ego</span>
+                        </button>
+                    </div>
+
+                    <!-- Mood Tag Picker -->
+                    <div class="flex items-center space-x-1.5 bg-midnight-800 px-3 py-1 rounded-lg border border-midnight-600">
+                        <span class="text-xs text-gray-400">Tâm trạng:</span>
+                        <select id="message-mood" class="bg-transparent text-xs text-purple-300 focus:outline-none cursor-pointer">
+                            <option value="" class="bg-midnight-800 text-gray-300">-- Không chọn --</option>
+                            <option value="💭 Trầm tư" class="bg-midnight-800">💭 Trầm tư</option>
+                            <option value="🌧️ U buồn" class="bg-midnight-800">🌧️ U buồn</option>
+                            <option value="🔥 Sâu sắc" class="bg-midnight-800">🔥 Sâu sắc</option>
+                            <option value="⚡ Căng thẳng" class="bg-midnight-800">⚡ Căng thẳng</option>
+                            <option value="🌙 Bình yên" class="bg-midnight-800">🌙 Bình yên</option>
+                            <option value="🧩 Hỗn độn" class="bg-midnight-800">🧩 Hỗn độn</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Textarea Form -->
+                <form id="chat-form" onsubmit="handleSendMessage(event)" class="relative flex items-end">
+                    <textarea id="message-input" rows="2"
+                        class="w-full bg-midnight-800 border border-midnight-600 rounded-xl pl-4 pr-14 py-3 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:border-purple-500 transition-colors resize-none shadow-inner"
+                        placeholder="Trò chuyện với bản ngã của bạn... (Nhấn Enter để gửi, Shift+Enter để xuống dòng)"></textarea>
+
+                    <button type="submit" id="send-btn" class="absolute right-2.5 bottom-2.5 w-10 h-10 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white flex items-center justify-center transition-all shadow-md shadow-indigo-600/30">
+                        <i class="fa-solid fa-paper-plane text-xs"></i>
+                    </button>
+                </form>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Confirm Modal for Deleting Chats -->
+    <div id="confirm-modal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-midnight-900 border border-midnight-700 max-w-sm w-full p-6 rounded-2xl shadow-2xl space-y-4 text-center">
+            <div class="w-12 h-12 rounded-full bg-red-500/10 text-red-400 flex items-center justify-center mx-auto text-xl">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div>
+                <h3 class="font-bold text-base text-gray-100">Xóa toàn bộ cuộc trò chuyện?</h3>
+                <p class="text-xs text-gray-400 mt-1">Hành động này sẽ xóa sạch nhật ký giữa bạn và alter ego trên trình duyệt này và không thể hoàn tác.</p>
+            </div>
+            <div class="flex space-x-3 pt-2">
+                <button onclick="closeConfirmModal()" class="flex-1 py-2 bg-midnight-800 hover:bg-midnight-700 text-gray-300 rounded-xl text-xs font-medium transition-all">
+                    Hủy bỏ
+                </button>
+                <button onclick="clearChatHistory()" class="flex-1 py-2 bg-red-600 hover:bg-red-500 text-white rounded-xl text-xs font-medium transition-all shadow-lg shadow-red-600/30">
+                    Xóa sạch
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application JavaScript Logic -->
+    <script>
+        // Safe localStorage helpers (tránh crash khi bị chặn hoặc dữ liệu hỏng)
+        function storageGet(key) {
+            try { return localStorage.getItem(key); } catch (e) { return null; }
+        }
+        function storageSet(key, value) {
+            try { localStorage.setItem(key, value); return true; } catch (e) { return false; }
+        }
+        function loadMessages() {
+            try {
+                const parsed = JSON.parse(storageGet('ego_messages'));
+                return Array.isArray(parsed) ? parsed : [];
+            } catch (e) {
+                return [];
+            }
+        }
+
+        // State Management
+        let appState = {
+            egoName: storageGet('ego_name') || 'Noname',
+            egoDesc: storageGet('ego_desc') || 'Phần sâu thẳm, chân thật và ít nói trong tâm trí bạn.',
+            egoAvatar: storageGet('ego_avatar') || '🌑',
+            activeRole: 'user', // 'user' or 'ego'
+            mode: 'chat', // 'chat' or 'reflect'
+            messages: loadMessages()
+        };
+
+        // DOM Elements
+        const chatContainer = document.getElementById('chat-container');
+        const chatForm = document.getElementById('chat-form');
+        const messageInput = document.getElementById('message-input');
+        const egoNameInput = document.getElementById('ego-name');
+        const egoDescInput = document.getElementById('ego-desc');
+        const egoAvatarInput = document.getElementById('ego-avatar');
+        const headerEgoName = document.getElementById('header-ego-name');
+        const headerEgoDesc = document.getElementById('header-ego-desc');
+        const headerAvatar = document.getElementById('header-avatar');
+        const roleEgoLabel = document.getElementById('role-ego-label');
+        const roleUserBtn = document.getElementById('role-user-btn');
+        const roleEgoBtn = document.getElementById('role-ego-btn');
+        const sendBtn = document.getElementById('send-btn');
+        const inputFooter = document.getElementById('input-footer');
+        const btnModeChat = document.getElementById('btn-mode-chat');
+        const btnModeReflect = document.getElementById('btn-mode-reflect');
+        const messageMoodSelect = document.getElementById('message-mood');
+        const toast = document.getElementById('toast');
+        const toastMsg = document.getElementById('toast-msg');
+        const confirmModal = document.getElementById('confirm-modal');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarBackdrop = document.getElementById('sidebar-backdrop');
+
+        let toastTimer = null;
+
+        // Câu nói hiển thị cố định (banner + màn hình trống)
+        const EGO_QUOTE = '"Hai mặt của một đồng xu. Chẳng thể nhìn thấy nhau, nhưng vĩnh viễn không thể tách rời. Cùng rơi xuống vực thẳm, hoặc cùng chạm tới bầu trời"';
+
+        // Initialization
+        window.addEventListener('load', function() {
+            document.getElementById('ego-quote').textContent = EGO_QUOTE;
+            loadSettingsToUI();
+            renderChat();
+
+            // Enter key submission handler in textarea
+            messageInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
+                    e.preventDefault();
+                    chatForm.requestSubmit();
+                }
+            });
+        });
+
+        function loadSettingsToUI() {
+            egoNameInput.value = appState.egoName;
+            egoDescInput.value = appState.egoDesc;
+            egoAvatarInput.value = appState.egoAvatar;
+
+            headerEgoName.textContent = appState.egoName;
+            headerEgoDesc.textContent = appState.egoDesc;
+            headerAvatar.textContent = appState.egoAvatar;
+            roleEgoLabel.textContent = appState.egoName;
+
+            // Cập nhật lại placeholder theo tên mới
+            setActiveRole(appState.activeRole);
+        }
+
+        function saveEgoSettings() {
+            const name = egoNameInput.value.trim();
+            const desc = egoDescInput.value.trim();
+            const avatar = egoAvatarInput.value.trim();
+
+            if (!name) {
+                showToast('Tên Alter Ego không được để trống!', 'error');
+                return;
+            }
+
+            appState.egoName = name;
+            appState.egoDesc = desc || 'Góc khuất nội tâm';
+            appState.egoAvatar = avatar || '🌑';
+
+            const ok = storageSet('ego_name', appState.egoName) &&
+                       storageSet('ego_desc', appState.egoDesc) &&
+                       storageSet('ego_avatar', appState.egoAvatar);
+
+            loadSettingsToUI();
+            renderChat();
+            if (ok) {
+                showToast('Đã cập nhật thông tin Alter Ego thành công');
+            } else {
+                showToast('Không lưu được vào trình duyệt, thay đổi chỉ có hiệu lực tạm thời', 'error');
+            }
+        }
+
+        function setActiveRole(role) {
+            appState.activeRole = role;
+            if (role === 'user') {
+                roleUserBtn.className = "px-3 py-1 rounded-md text-xs font-semibold transition-all bg-indigo-600 text-white shadow";
+                roleEgoBtn.className = "px-3 py-1 rounded-md text-xs font-semibold transition-all text-gray-400 hover:text-white";
+                sendBtn.className = "absolute right-2.5 bottom-2.5 w-10 h-10 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white flex items-center justify-center transition-all shadow-md shadow-indigo-600/30";
+                messageInput.placeholder = "Nhập suy nghĩ của bạn... (Enter để gửi)";
+            } else {
+                roleEgoBtn.className = "px-3 py-1 rounded-md text-xs font-semibold transition-all bg-purple-600 text-white shadow";
+                roleUserBtn.className = "px-3 py-1 rounded-md text-xs font-semibold transition-all text-gray-400 hover:text-white";
+                sendBtn.className = "absolute right-2.5 bottom-2.5 w-10 h-10 rounded-lg bg-purple-600 hover:bg-purple-500 text-white flex items-center justify-center transition-all shadow-md shadow-purple-600/30";
+                messageInput.placeholder = `Nhập lời phản hồi từ ${appState.egoName}... (Enter để gửi)`;
+            }
+        }
+
+        function setMode(mode) {
+            appState.mode = mode;
+            if (mode === 'chat') {
+                btnModeChat.className = "px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center space-x-1.5 bg-purple-600 text-white shadow-sm";
+                btnModeReflect.className = "px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center space-x-1.5 text-gray-400 hover:text-white";
+                inputFooter.classList.remove('hidden');
+            } else {
+                btnModeReflect.className = "px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center space-x-1.5 bg-purple-600 text-white shadow-sm";
+                btnModeChat.className = "px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center space-x-1.5 text-gray-400 hover:text-white";
+                inputFooter.classList.add('hidden');
+            }
+            renderChat();
+        }
+
+        function handleSendMessage(e) {
+            e.preventDefault();
+            const text = messageInput.value.trim();
+            const mood = messageMoodSelect.value;
+
+            if (!text) return;
+
+            const newMessage = {
+                id: Date.now() + Math.floor(Math.random() * 1000),
+                sender: appState.activeRole,
+                text: text,
+                timestamp: new Date().toISOString(),
+                mood: mood || null
+            };
+
+            appState.messages.push(newMessage);
+            persistMessages();
+
+            messageInput.value = '';
+            messageMoodSelect.value = '';
+            renderChat();
+        }
+
+        function persistMessages() {
+            const ok = storageSet('ego_messages', JSON.stringify(appState.messages));
+            if (!ok) {
+                showToast('Không lưu được vào trình duyệt (bộ nhớ đầy hoặc bị chặn)', 'error');
+            }
+        }
+
+        function renderChat() {
+            chatContainer.innerHTML = '';
+
+            // Banner chỉ hiện ở chế độ Suy ngẫm (và khi đã có tin nhắn, vì màn hình trống tự có câu này)
+            document.getElementById('quote-banner').classList.toggle(
+                'hidden', !(appState.mode === 'reflect' && appState.messages.length > 0)
+            );
+
+            if (appState.messages.length === 0) {
+                chatContainer.innerHTML = `
+                    <div class="h-full flex flex-col items-center justify-center text-center text-gray-500 space-y-3">
+                        <div class="w-16 h-16 rounded-2xl bg-midnight-800 border border-midnight-700 flex items-center justify-center text-2xl">
+                            🪞
+                        </div>
+                        <p class="text-sm max-w-md">${EGO_QUOTE}</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let lastDateStr = '';
+            const safeAvatar = escapeHtml(appState.egoAvatar);
+            const safeEgoName = escapeHtml(appState.egoName);
+
+            appState.messages.forEach(msg => {
+                // Date separator logic
+                const dateObj = new Date(msg.timestamp);
+                const dateStr = dateObj.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+                if (dateStr !== lastDateStr) {
+                    lastDateStr = dateStr;
+                    const dateDiv = document.createElement('div');
+                    dateDiv.className = "flex justify-center my-4";
+                    dateDiv.innerHTML = `<span class="bg-midnight-800 border border-midnight-700/60 text-gray-400 text-[10px] px-3 py-1 rounded-full uppercase tracking-wider">${dateStr}</span>`;
+                    chatContainer.appendChild(dateDiv);
+                }
+
+                const isUser = msg.sender === 'user';
+                const messageWrapper = document.createElement('div');
+                messageWrapper.className = `flex ${isUser ? 'justify-end' : 'justify-start'} group mb-4`;
+
+                const timeStr = dateObj.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+
+                // Formatting text with line breaks
+                const formattedText = escapeHtml(msg.text).replace(/\n/g, '<br>');
+                const safeMood = msg.mood ? escapeHtml(msg.mood) : '';
+
+                // Nút xóa: luôn hiện trên màn hình cảm ứng/nhỏ, chỉ hiện khi hover trên desktop
+                const deleteBtn = `
+                    <button onclick="deleteMessage(${Number(msg.id)})" class="opacity-60 md:opacity-0 md:group-hover:opacity-100 transition-opacity text-gray-500 hover:text-red-400 p-1 -m-1" title="Xóa tin nhắn" aria-label="Xóa tin nhắn">
+                        <i class="fa-solid fa-xmark text-xs"></i>
+                    </button>`;
+
+                if (isUser) {
+                    // User Message Bubble (Right)
+                    messageWrapper.innerHTML = `
+                        <div class="max-w-[85%] sm:max-w-xl bg-indigo-950/40 border border-indigo-500/30 rounded-2xl rounded-tr-sm p-4 shadow-sm">
+                            <div class="flex items-center justify-between space-x-4 mb-1">
+                                <span class="text-xs font-semibold text-indigo-300">Bạn</span>
+                                <div class="flex items-center space-x-2">
+                                    ${safeMood ? `<span class="text-[10px] bg-indigo-900/40 border border-indigo-500/20 text-indigo-200 px-2 py-0.5 rounded-full">${safeMood}</span>` : ''}
+                                    <span class="text-[10px] text-gray-500">${timeStr}</span>
+                                    ${deleteBtn}
+                                </div>
+                            </div>
+                            <p class="text-sm text-gray-100 leading-relaxed font-sans break-words">${formattedText}</p>
+                        </div>
+                    `;
+                } else {
+                    // Alter Ego Message Bubble (Left - distinct font/styling)
+                    messageWrapper.innerHTML = `
+                        <div class="flex items-start space-x-3 max-w-[90%] sm:max-w-xl">
+                            <div class="w-8 h-8 rounded-full bg-purple-900/60 border border-purple-500/40 flex items-center justify-center text-sm shadow-sm flex-shrink-0 mt-1">
+                                ${safeAvatar}
+                            </div>
+                            <div class="min-w-0 bg-midnight-800/80 border border-purple-500/20 rounded-2xl rounded-tl-sm p-4 shadow-sm">
+                                <div class="flex items-center justify-between space-x-4 mb-1">
+                                    <span class="text-xs font-semibold text-purple-300 font-alter tracking-wide">${safeEgoName}</span>
+                                    <div class="flex items-center space-x-2">
+                                        ${safeMood ? `<span class="text-[10px] bg-purple-900/40 border border-purple-500/20 text-purple-200 px-2 py-0.5 rounded-full">${safeMood}</span>` : ''}
+                                        <span class="text-[10px] text-gray-500">${timeStr}</span>
+                                        ${deleteBtn}
+                                    </div>
+                                </div>
+                                <p class="text-sm text-purple-100/90 leading-relaxed font-alter italic break-words">${formattedText}</p>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                chatContainer.appendChild(messageWrapper);
+            });
+
+            // Scroll to bottom
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function deleteMessage(id) {
+            appState.messages = appState.messages.filter(m => m.id !== id);
+            persistMessages();
+            renderChat();
+            showToast('Đã xóa tin nhắn');
+        }
+
+        function confirmClearChat() {
+            confirmModal.classList.remove('hidden');
+            confirmModal.classList.add('flex');
+            closeSidebar(); // chỉ đóng, không toggle
+        }
+
+        function closeConfirmModal() {
+            confirmModal.classList.add('hidden');
+            confirmModal.classList.remove('flex');
+        }
+
+        function clearChatHistory() {
+            appState.messages = [];
+            persistMessages();
+            renderChat();
+            closeConfirmModal();
+            showToast('Đã xóa toàn bộ nhật ký');
+        }
+
+        function exportToWord() {
+            if (appState.messages.length === 0) {
+                showToast('Không có dữ liệu để xuất!', 'error');
+                return;
+            }
+
+            const e = escapeHtml;
+            let body = `
+                <h1 style="font-family:Georgia,serif;font-size:20pt;color:#4C1D95;margin-bottom:4pt;">Nhật ký đối thoại: Bạn &amp; ${e(appState.egoName)}</h1>
+                <p style="color:#555;font-size:10pt;margin:0;"><b>Alter Ego:</b> ${e(appState.egoDesc)}</p>
+                <p style="color:#555;font-size:10pt;margin:0 0 14pt 0;"><b>Ngày xuất:</b> ${e(new Date().toLocaleString('vi-VN'))}</p>
+                <hr style="border:0;border-top:1px solid #999;">
+            `;
+
+            let lastDateStr = '';
+            appState.messages.forEach(msg => {
+                const d = new Date(msg.timestamp);
+                const dateStr = d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                const timeStr = d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+
+                if (dateStr !== lastDateStr) {
+                    lastDateStr = dateStr;
+                    body += `<h2 style="font-family:Calibri,Arial,sans-serif;font-size:12pt;color:#374151;margin:18pt 0 6pt 0;border-bottom:1px solid #ccc;">${e(dateStr)}</h2>`;
+                }
+
+                const isUser = msg.sender === 'user';
+                const name = isUser ? 'Bạn' : appState.egoName;
+                const color = isUser ? '#3730A3' : '#6D28D9';
+                const moodStr = msg.mood ? ` &nbsp;·&nbsp; ${e(msg.mood)}` : '';
+                const text = e(msg.text).replace(/\n/g, '<br>');
+                const textStyle = isUser
+                    ? 'font-family:Calibri,Arial,sans-serif;font-size:11pt;'
+                    : 'font-family:Georgia,serif;font-size:11pt;font-style:italic;';
+
+                body += `
+                    <p style="margin:10pt 0 2pt 0;font-family:Calibri,Arial,sans-serif;font-size:10pt;color:${color};">
+                        <b>${e(name)}</b> <span style="color:#777;">· ${e(timeStr)}${moodStr}</span>
+                    </p>
+                    <p style="margin:0 0 6pt 0;${textStyle}line-height:1.4;">${text}</p>
+                `;
+            });
+
+            const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+<head><meta charset="utf-8"><title>Nhật ký Alter Ego</title></head>
+<body>${body}</body></html>`;
+
+            const blob = new Blob(['\ufeff', html], { type: 'application/msword;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Nhat_Ky_Alter_Ego_${new Date().toISOString().slice(0, 10)}.doc`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            showToast('Đã tải xuống file nhật ký (Word)');
+        }
+
+        function toggleSidebar() {
+            const isClosed = sidebar.classList.toggle('-translate-x-full');
+            sidebarBackdrop.classList.toggle('hidden', isClosed);
+        }
+
+        function closeSidebar() {
+            sidebar.classList.add('-translate-x-full');
+            sidebarBackdrop.classList.add('hidden');
+        }
+
+        function showToast(message, type = 'success') {
+            toastMsg.textContent = message;
+            const icon = document.getElementById('toast-icon');
+            if (type === 'error') {
+                icon.className = 'fa-solid fa-circle-exclamation text-red-400';
+            } else {
+                icon.className = 'fa-solid fa-circle-check text-purple-400';
+            }
+
+            toast.style.transform = 'translateY(0)';
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                toast.style.transform = 'translateY(-200%)';
+            }, 3000);
+        }
+
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return String(text).replace(/[&<>"']/g, function(m) { return map[m]; });
+        }
+    </script>
+</body>
+</html>
