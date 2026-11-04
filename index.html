@@ -194,7 +194,7 @@
                     <div class="flex items-center space-x-2 bg-midnight-800 p-1 rounded-lg border border-midnight-600">
                         <span class="text-xs text-gray-400 px-2 font-medium">Gửi với tư cách:</span>
                         <button type="button" id="role-user-btn" onclick="setActiveRole('user')" class="px-3 py-1 rounded-md text-xs font-semibold transition-all bg-indigo-600 text-white shadow">
-                            Bạn (User)
+                            Bạn
                         </button>
                         <button type="button" id="role-ego-btn" onclick="setActiveRole('ego')" class="px-3 py-1 rounded-md text-xs font-semibold transition-all text-gray-400 hover:text-white">
                             <span id="role-ego-label">Alter Ego</span>
@@ -507,7 +507,7 @@
                                         ${deleteBtn}
                                     </div>
                                 </div>
-                                <p class="text-sm text-purple-100/90 leading-relaxed font-alter italic break-words">${formattedText}</p>
+                                <p class="text-sm text-purple-100/90 leading-relaxed font-alter break-words">${formattedText}</p>
                             </div>
                         </div>
                     `;
@@ -578,7 +578,7 @@
                 const text = e(msg.text).replace(/\n/g, '<br>');
                 const textStyle = isUser
                     ? 'font-family:Calibri,Arial,sans-serif;font-size:11pt;'
-                    : 'font-family:Georgia,serif;font-size:11pt;font-style:italic;';
+                    : 'font-family:Georgia,serif;font-size:11pt;';
 
                 body += `
                     <p style="margin:10pt 0 2pt 0;font-family:Calibri,Arial,sans-serif;font-size:10pt;color:${color};">
